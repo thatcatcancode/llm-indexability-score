@@ -16,6 +16,17 @@ if (!url) {
 
   const html = await page.content();
   const text = await page.evaluate(() => document.body.innerText);
+  
+  // Measure TTFB (Time To First Byte)
+  const performanceMetrics = await page.evaluate(() => {
+    const timing = performance.getEntriesByType('navigation')[0];
+    return {
+      ttfb: timing.responseStart - timing.requestStart,
+      domContentLoaded: timing.domContentLoadedEventEnd - timing.fetchStart,
+      totalLoadTime: timing.loadEventEnd - timing.fetchStart
+    };
+  });
+  
   // Checks for schema.org markup - this indicates traditional SEO best practices, but can be reused by LLMs to index the page.
   const hasSchema = html.includes("application/ld+json");
   /**
@@ -50,11 +61,12 @@ if (!url) {
 
   let score = 0;
   score += allowsLLMBots ? 20 : 0;
-  score += textDensity > 20 ? 15 : 5;
+  score += textDensity > 20 ? 20 : 0;
   score += hasSchema ? 10 : 0;
-  score += hasCanonical ? 5 : 0;
-  score += text.length > 200 ? 10 : 0;
-
+  score += hasCanonical ? 10 : 0;
+  score += text.length > 200 ? 20 : 0;
+  // Fast TTFB is crucial for LLM bots which move on quickly
+  score += text.length > 200 && performanceMetrics.ttfb < 200 ? 20 : performanceMetrics.ttfb < 800 ? 10 : 0;
   /**
    * TODO: Extend this score with more metrics, like:
    * - Document has <title> tag
@@ -70,6 +82,9 @@ if (!url) {
     textDensity: textDensity.toFixed(1),
     hasSchema,
     hasCanonical,
+    ttfb: `${performanceMetrics.ttfb.toFixed(0)}ms`,
+    domContentLoaded: `${performanceMetrics.domContentLoaded.toFixed(0)}ms`,
+    totalLoadTime: `${performanceMetrics.totalLoadTime.toFixed(0)}ms`,
   });
   await browser.close();
 })();
