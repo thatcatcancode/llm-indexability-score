@@ -16,8 +16,5 @@ node llm-indexability-score.js <url>
 ```
 
 
-## To Do
-
-- [ ] Allocate ~5 weights per LLM bot allowed in robots.txt file
-- [ ] Allocate weight for document title tag existing
-- [ ] Allocate weight for meta description tag existing
+## Details
+Formula with arbitrary weights - look for the following: images versus text, TTFB, structured schema, canonical url, text density, robots.txt allow list, etc. 
