@@ -66,7 +66,7 @@ if (!url) {
 
   console.log(`✅ LLM Indexability Score for ${url}: ${score}/100`);
   console.log({
-    allowsGPTBot: allowsLLMBots,
+    allowsLLMBots: allowsLLMBots,
     textDensity: textDensity.toFixed(1),
     hasSchema,
     hasCanonical,
